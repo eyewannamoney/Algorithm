@@ -1,0 +1,121 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_ROWS 7
+#define MAX_COLS 7
+#define MAX_STACK_SIZE (MAX_ROWS) * (MAX_COLS)
+
+int maze[MAX_ROWS][MAX_COLS] = {
+	{1, 1, 1, 1, 1, 1, 1},
+	{1, 0, 0, 1, 1, 0, 1},
+	{1, 1, 1, 0, 0, 1, 1},
+	{1, 1, 1, 0, 1, 1, 1},
+	{1, 1, 0, 1, 0, 1, 1},
+	{1, 0, 1, 1, 0, 0, 1},
+	{1, 1, 1, 1, 1, 1, 1}};
+
+typedef struct offset {
+	int dr, dc;
+} offset;
+
+offset move8[8] = {
+	{0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}};
+
+typedef struct element {
+	int row;
+	int col;
+	int dir;
+} element;
+
+element stackA[MAX_STACK_SIZE];
+int top = -1;
+
+void push(element a)
+{
+	if (top == MAX_STACK_SIZE - 1) {
+		printf("스택이 가득찻습니다");
+		return;
+	}
+	stackA[++top] = a;
+}
+
+element pop()
+{
+	if (top == -1) {
+		fprintf(stderr, "스택이 비어잇습니다");
+		exit(1);
+	}
+
+	return stackA[top--];
+}
+
+void print_path(int er, int ec)
+{
+	for (int i = 0; i <= top; i++) {
+		printf("row: %d, col : %d\n", stackA[i].row, stackA[i].col);
+	}
+	printf("row: %d, col : %d \n", er, ec);
+}
+
+#define START_ROW 1
+#define START_COL 1
+#define EXIT_ROW 5
+#define EXIT_COL 5
+
+int mark[MAX_ROWS][MAX_COLS];
+
+void path()
+{
+	int col = START_COL;
+	int row = START_ROW;
+	int dir = 0;
+
+	for (int r = 0; r < MAX_ROWS; r++) {
+		for (int c = 0; c < MAX_COLS; c++) {
+			mark[r][c] = 0;
+		}
+	}
+
+	bool found = false;
+
+	mark[row][col] = 1;
+	push((element){row, col, dir});
+
+	while (top > -1 && !found) {
+		element position = pop();
+		row = position.row;
+		col = position.col;
+		dir = position.dir;
+
+		while (dir < 8 && !found) {
+			int nextRow = row + move8[dir].dr;
+			int nextCol = col + move8[dir].dc;
+
+			if (nextRow == EXIT_ROW && nextCol == EXIT_COL) {
+				push((element){row, col, dir});
+				found = true;
+			} else if (maze[nextRow][nextCol] == 0 && mark[nextRow][nextCol] == 0) {
+				push((element){row, col, dir + 1});
+				mark[nextRow][nextCol] = 1;
+				row = nextRow;
+				col = nextCol;
+				dir = 0;
+			} else {
+				dir++;
+			}
+		}
+
+		if (found) {
+			print_path(EXIT_ROW, EXIT_COL);
+		} else {
+			printf("경로를 찾지못하였습니다");
+		}
+	}
+}
+
+int main()
+{
+	path();
+
+	return 0;
+}

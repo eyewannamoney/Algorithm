@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node *nodePointer;
+typedef struct Node {
+	nodePointer llink;
+	int value;
+	nodePointer rlink;
+} Node;
+
+void initdll()
+{
+	nodePointer header = malloc(sizeof(Node));
+	nodePointer trailer = malloc(sizeof(Node));
+	header->value = -1;
+	trailer->value = -1;
+	header->rlink = trailer;
+	trailer->llink = header;
+}
+
+void dinsert(nodePointer node, nodePointer newnode)
+{
+	newnode->rlink = node->rlink;
+	newnode->llink = node;
+
+	node->rlink->llink = newnode;
+	node->rlink = newnode;
+}
+
+void erase(nodePointer node)
+{
+
+	if (!node)
+		return;
+
+	if (node->llink == NULL || node->rlink == NULL) {
+		fprintf(stderr, "헤더나 트레일러는 삭제하실수없습니다");
+		return;
+	} else {
+		nodePointer temp = node;
+		node->llink->rlink = node->rlink;
+		node->rlink->llink = node->llink;
+
+		free(temp);
+	}
+}

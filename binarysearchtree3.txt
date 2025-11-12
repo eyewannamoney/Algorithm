@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node *nodepointer;
+typedef struct node {
+	int data;
+	nodepointer leftChild;
+	nodepointer rightChild;
+} node;
+
+nodepointer initnode(int data, nodepointer a)
+{
+	(a) = (nodepointer)malloc(sizeof(node));
+	(a)->data = data;
+	(a)->leftChild = NULL;
+	(a)->rightChild = NULL;
+	return a;
+}
+
+void insert(nodepointer *a, int k)
+{
+	if (*a == NULL) {
+		*a = initnode(k, *a);
+	} else {
+
+		if (k < (*a)->data) {
+			if ((*a)->leftChild == NULL) {
+				(*a)->leftChild = initnode(k, ((*a)->leftChild));
+			} else {
+				insert(&((*a)->leftChild), k);
+			}
+		} else {
+			if ((*a)->rightChild == NULL) {
+				(*a)->rightChild = initnode(k, ((*a)->rightChild));
+			} else {
+				insert(&((*a)->rightChild), k);
+			}
+		}
+	}
+}
+
+nodepointer succ(nodepointer a)
+{
+	nodepointer temp = a->rightChild;
+	while (temp && temp->leftChild != NULL) {
+		temp = temp->leftChild;
+	}
+	return temp;
+}
+
+nodepointer erase(nodepointer a, int k)
+{
+	if (!a) {
+		return NULL;
+	}
+
+	if (k < a->data) {
+		a->leftChild = erase(a->leftChild, k);
+	} else if (k > a->data) {
+		a->rightChild = erase(a->rightChild, k);
+	} else {
+		if (a->leftChild && a->rightChild) {
+			nodepointer temp = succ(a);
+			a->data = temp->data;
+			a->rightChild = erase(a->rightChild, temp->data);
+		} else {
+			nodepointer n = a->leftChild ? a->leftChild : a->rightChild;
+			free(a);
+			return n;
+		}
+	}
+	return a;
+}
+
+nodepointer find(nodepointer curr, int value)
+{
+	if (!curr) {
+		return NULL;
+	}
+	if (value == curr->data) {
+		return curr;
+	} else {
+		if (value > curr->data) {
+			return find(curr->rightChild, value);
+		} else {
+			return find(curr->leftChild, value);
+		}
+	}
+}
+
+void inorder(nodepointer a)
+{
+	if (a) {
+		inorder(a->leftChild);
+		printf("%d ,", a->data);
+		inorder(a->rightChild);
+	}
+}
+
+int main()
+{
+	nodepointer bst = NULL;
+	insert(&bst, 10);
+	insert(&bst, 14);
+	insert(&bst, 5);
+	insert(&bst, 7);
+	insert(&bst, 18);
+	insert(&bst, 4);
+	insert(&bst, 6);
+	insert(&bst, 20);
+	insert(&bst, 16);
+
+	inorder(bst);
+	return 0;
+}

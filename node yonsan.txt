@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct listNode *listPointer;
+typedef struct listNode {
+	int coef;
+	int exp;
+	listPointer link;
+} listNode;
+
+listPointer invert(listPointer a)
+{
+
+	listPointer middle = NULL;
+	listPointer trail;
+	while (a) {
+		trail = middle;
+		middle = a;
+		a = a->link;
+		middle->link = trail;
+	}
+
+	return middle;
+}
+
+listPointer concatenate(listPointer a, listPointer b)
+{
+	listPointer temp = a;
+
+	while (temp->link != NULL) {
+		temp = temp->link;
+	}
+
+	temp->link = b;
+
+	return a;
+}
+
+listPointer insertfront(listPointer *last, listPointer node)
+{
+
+	if (!*last) {
+		*last = node;
+		(*last)->link = node;
+	} else {
+		node->link = (*last)->link;
+		(*last)->link = node;
+	}
+}
+
+int length(listPointer *last)
+{
+	int count = 0;
+	listPointer temp = *last;
+	if (!temp)
+		exit(1);
+	do {
+		count++;
+		temp = temp->link;
+	} while (temp != *last);
+
+	return count;
+}

@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define TRUE 1
+#define FALSE 0
+
+typedef struct node *nodelink;
+typedef struct node {
+	char data;
+	nodelink leftChild;
+	nodelink rightChild;
+	short int leftThread;
+	short int rightThread;
+} node;
+
+nodelink insucc(nodelink a)
+{
+	nodelink temp = a->rightChild;
+	if (a->rightThread == FALSE) {
+		while (!temp->leftThread) {
+			temp = temp->leftChild;
+		}
+	}
+	return temp;
+}
+
+void tinorder(nodelink a)
+{
+	nodelink temp = a;
+	for (;;) {
+		temp = insucc(temp);
+		if (temp == a) {
+			break;
+		}
+		printf("%c", temp->data);
+	}
+}
+
+nodelink createnode(char c)
+{
+	nodelink a = (nodelink)malloc(sizeof(node));
+	a->data = c;
+	a->leftChild = NULL;
+	a->rightChild = NULL;
+	a->leftThread = TRUE;
+	a->rightThread = TRUE;
+
+	return a;
+}
+
+nodelink createhead()
+{
+	nodelink head = (nodelink)malloc(sizeof(node));
+	head->data = 0;
+	head->leftChild = head;
+	head->rightChild = head;
+	head->leftThread = TRUE;
+	head->rightThread = TRUE;
+
+	return head;
+}
+
+void attachRoot(nodelink root, nodelink head)
+{
+	head->leftChild = root;
+	head->leftThread = FALSE;
+	head->rightChild = root;
+	head->rightThread = FALSE;
+
+	root->leftChild = head;
+	root->rightChild = head;
+	root->leftThread = TRUE;
+	root->rightThread = TRUE;
+}
+
+void insertLeft(nodelink s, nodelink l)
+{
+	nodelink temp;
+
+	l->leftChild = s->leftChild;
+	l->leftThread = s->leftThread;
+	l->rightChild = s;
+	l->rightThread = TRUE;
+
+	s->leftChild = l;
+	s->leftThread = FALSE;
+
+	if (l->leftThread == FALSE) {
+		temp = l->leftChild;
+		while (temp->rightThread == FALSE) {
+			temp = temp->rightChild;
+		}
+		temp->rightChild = l;
+	}
+}
+
+void insertRight(nodelink s, nodelink r)
+{
+	nodelink temp;
+
+	r->rightChild = s->rightChild;
+	r->rightThread = s->rightThread;
+	r->leftChild = s;
+	r->leftThread = TRUE;
+
+	s->rightChild = r;
+	s->rightThread = FALSE;
+
+	if (r->rightThread == FALSE) {
+		temp = r->rightChild;
+		while (temp->leftThread == FALSE) {
+			temp = temp->leftChild;
+		}
+		temp->leftChild = r;
+	}
+}
+
+int inorderequal(nodelink h1, nodelink h2)
+{
+	nodelink a1 = h1;
+	nodelink a2 = h2;
+
+	for (;;) {
+		nodelink a1 = insucc(a1);
+		nodelink a2 = insucc(a2);
+
+		if ((a1 == h1) && (a2 == h2))
+			return TRUE;
+		if ((a1 == h1) ^ (a2 == h2))
+			return FALSE;
+		if (a1->data != a2->data)
+			return FALSE;
+	}
+}
+
+int main()
+{
+	nodelink head1 = createhead();
+	nodelink A = createnode('A');
+	nodelink B = createnode('B');
+	nodelink C = createnode('C');
+	nodelink D = createnode('D');
+	nodelink E = createnode('E');
+	nodelink F = createnode('F');
+	nodelink G = createnode('G');
+	nodelink H = createnode('H');
+
+	attachRoot(A, head1);
+	insertLeft(A, B);
+	insertRight(A, C);
+	insertLeft(B, D);
+	insertRight(B, E);
+	insertLeft(C, F);
+	insertRight(C, G);
+	insertLeft(D, H);
+
+	tinorder(head1);
+}

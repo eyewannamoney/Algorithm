@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_QUEUE_SIZE 15
+
+typedef struct node *nodepointer;
+typedef struct node {
+	char data;
+	nodepointer left;
+	nodepointer right;
+} node;
+
+nodepointer initnode(nodepointer *a, char data)
+{
+	(*a) = (nodepointer)malloc(sizeof(node));
+	(*a)->data = data;
+	(*a)->left = NULL;
+	(*a)->right = NULL;
+
+	return *a;
+}
+
+typedef struct circularqueue {
+	int front, rear;
+	nodepointer data[MAX_QUEUE_SIZE];
+} circularqueue;
+
+void init(circularqueue *q)
+{
+	q->front = 0;
+	q->rear = 0;
+}
+
+int isFull(circularqueue *q)
+{
+	return (q->rear + 1) % MAX_QUEUE_SIZE == q->front;
+}
+
+int isEmpty(circularqueue *q)
+{
+	return q->front == q->rear;
+}
+
+void enqueue(circularqueue *q, nodepointer item)
+{
+	if (isFull(q)) {
+		fprintf(stderr, "큐가 가득찼다");
+		exit(1);
+	}
+	q->rear = (q->rear + 1) % MAX_QUEUE_SIZE;
+	q->data[q->rear] = item;
+}
+
+nodepointer dequeue(circularqueue *q)
+{
+	if (isEmpty(q)) {
+		fprintf(stderr, "큐가 없다");
+		exit(1);
+	}
+
+	q->front = (q->front + 1) % MAX_QUEUE_SIZE;
+	return q->data[q->front];
+}
+
+/*---------------------------- queue 구현 했음-------------------------------------------------------------*/
+
+void preorder(nodepointer a)
+{
+	if (a) {
+		printf("%c ,", a->data);
+		preorder(a->left);
+		preorder(a->right);
+	}
+}
+
+void inorder(nodepointer a)
+{
+	if (a) {
+		inorder(a->left);
+		printf("%c ,", a->data);
+		inorder(a->right);
+	}
+}
+
+void postorder(nodepointer a)
+{
+	if (a) {
+		postorder(a->left);
+		postorder(a->right);
+		printf("%c ,", a->data);
+	}
+}
+
+void levelorder(nodepointer a)
+{
+	circularqueue *q;
+	init(q);
+
+	enqueue(q, a);
+	while (!isEmpty(q)) {
+		nodepointer curr = dequeue(q);
+
+		printf("%c ,", curr->data);
+		if (curr->left)
+			enqueue(q, curr->left);
+		if (curr->right)
+			enqueue(q, curr->right);
+	}
+}
+
+int main()
+{
+
+	nodepointer root = NULL;
+	root = initnode(&root, 'A');
+	root->left = initnode(&root->left, 'B');
+	root->right = initnode(&root->right, 'C');
+	root->left->left = initnode(&root->left->left, 'D');
+	root->left->right = initnode(&root->left->right, 'E');
+	root->right->left = initnode(&root->right->left, 'F');
+	root->right->right = initnode(&root->right->right, 'E');
+
+	preorder(root);
+	return 0;
+}

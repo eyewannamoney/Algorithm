@@ -1,0 +1,156 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TRUE 1
+#define FALSE 0
+
+typedef struct threadedTree *threadedPointer;
+typedef struct threadedTree {
+	short int leftThread;
+	threadedPointer leftChild;
+	char data;
+	threadedPointer rightChild;
+	short int rightThread;
+} threadedTree;
+
+threadedPointer insucc(threadedPointer tree)
+{
+	threadedPointer temp;
+	temp = tree->rightChild;
+	if (!tree->rightThread) {
+		while (!temp->leftThread) {
+			temp = temp->leftChild;
+		}
+	}
+
+	return temp;
+}
+
+void tinorder(threadedPointer tree)
+{
+	threadedPointer temp = tree;
+	for (;;) {
+		temp = insucc(temp);
+		if (temp == tree)
+			break;
+		printf("%c\n", temp->data);
+	}
+}
+
+void insertRight(threadedPointer s, threadedPointer r)
+{
+	threadedPointer temp;
+	r->rightChild = s->rightChild;
+	r->rightThread = s->rightThread;
+	r->leftChild = s;
+	r->leftThread = TRUE;
+
+	s->rightChild = r;
+	s->rightThread = FALSE;
+
+	if (!r->rightThread) {
+		temp = insucc(r);
+		temp->leftChild = r;
+	}
+}
+
+void insertLeft(threadedPointer s, threadedPointer l)
+{
+	threadedPointer temp;
+
+	l->leftChild = s->leftChild;
+	l->leftThread = s->leftThread;
+	l->rightChild = s;
+	l->rightThread = TRUE;
+
+	s->leftChild = l;
+	s->leftThread = FALSE;
+
+	if (!l->leftThread) {
+		temp = l->leftChild;
+		while (!temp->rightThread) {
+			temp = temp->rightChild;
+		}
+		temp->rightChild = l;
+	}
+}
+
+int equalInorder(threadedPointer h1, threadedPointer h2)
+{
+	threadedPointer a = h1, b = h2;
+	for (;;) {
+		a = insucc(a);
+		b = insucc(b);
+		if (a == h1 && b == h2)
+			return TRUE;
+		if ((a == h1) ^ (b == h2))
+			return FALSE;
+		if (a->data != b->data)
+			return FALSE;
+	}
+}
+
+threadedPointer craeteNode(char c)
+{
+	threadedPointer p = (threadedPointer)malloc(sizeof(threadedTree));
+	p->data = c;
+	p->leftThread = TRUE;
+	p->rightThread = TRUE;
+	p->leftChild = NULL;
+	p->rightChild = NULL;
+	return p;
+}
+
+threadedPointer craeteHead()
+{
+	threadedPointer head = (threadedPointer)malloc(sizeof(threadedTree));
+	head->data = 0;
+	head->leftThread = TRUE;
+	head->rightThread = TRUE;
+	head->leftChild = head;
+	head->rightChild = head;
+
+	return head;
+}
+
+void attachRoot(threadedPointer head, threadedPointer root)
+{
+	root->leftChild = head;
+	root->rightChild = head;
+
+	head->leftChild = root;
+	head->leftThread = FALSE;
+	head->rightChild = root;
+	head->rightThread = FALSE;
+}
+
+int main()
+{
+	threadedPointer head = craeteHead();
+	threadedPointer A = craeteNode('A');
+	attachRoot(head, A);
+
+	threadedPointer B = craeteNode('B');
+	threadedPointer C = craeteNode('C');
+	threadedPointer D = craeteNode('D');
+	threadedPointer E = craeteNode('E');
+
+	insertLeft(A, B);
+	insertRight(A, C);
+	insertLeft(C, D);
+	insertRight(C, E);
+
+	tinorder(head);
+
+	threadedPointer head2 = craeteHead();
+	threadedPointer root2 = craeteNode('A');
+	attachRoot(head2, root2);
+	insertLeft(root2, craeteNode('B'));
+	insertRight(root2, craeteNode('C'));
+	insertLeft(root2->rightChild, craeteNode('D'));
+	insertRight(root2->rightChild, craeteNode('E'));
+
+	printf("두 트리 동일? %s\n", equalInorder(head, head2) ? "YES" : "NO");
+
+	return 0;
+}

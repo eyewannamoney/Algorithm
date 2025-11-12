@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void fail(char *pat, int *failure)
+{
+	int n = strlen(pat);
+	failure[0] = -1;
+	int i;
+	for (int j = 1; j < n; j++) {
+		i = failure[j - 1];
+		while (i >= 0 && pat[j] != pat[i + 1]) {
+			i = failure[i];
+		}
+		if (pat[j] == pat[i + 1]) {
+			failure[j] = i + 1;
+		} else {
+			failure[j] = -1;
+		}
+	}
+}
+
+int pmatch(char *pat, char *s, int *failure)
+{
+	int plen = strlen(pat);
+	int slen = strlen(s);
+	int i = 0, j = 0;
+
+	while (i < plen && j < slen) {
+		if (pat[i] == s[j]) {
+			i++;
+			j++;
+		} else if (i == 0) {
+			j++;
+		} else {
+			i = failure[i - 1] + 1;
+		}
+	}
+
+	return i == plen ? j - plen : -1;
+}

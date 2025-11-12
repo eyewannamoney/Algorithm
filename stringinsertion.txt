@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void insertion(char *a, char *b, int i)
+{
+	int alen = strlen(a);
+	int blen = strlen(b);
+	char *temp = (char *)malloc((size_t)(alen + blen + 1));
+
+	if (i < 0 || i > alen) {
+		fprintf(stderr, "인덱스 범위에 있지않다");
+		exit(1);
+	}
+
+	if (!alen) {
+		strcpy(a, b);
+	} else if (blen) {
+		strncpy(temp, a, i);
+		temp[i] = '\0';
+		strcat(temp, b);
+		strcat(temp, (a + i));
+		strcpy(a, temp);
+		free(temp);
+	}
+}

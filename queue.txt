@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct element {
+	int i;
+} element;
+
+typedef struct node *nodepointer;
+typedef struct node {
+	element data;
+	nodepointer link;
+} node;
+
+typedef struct Queue {
+	nodepointer last;
+} Queue;
+
+void initQueue(Queue *a)
+{
+	a->last = NULL;
+}
+
+nodepointer createnode(element data)
+{
+	nodepointer newNode = (nodepointer)malloc(sizeof(node));
+	if (!newNode) {
+		fprintf(stderr, "메모리가 꽉찼다");
+		exit(1);
+	}
+	newNode->data = data;
+	newNode->link = NULL;
+	return newNode;
+}
+
+void insert(Queue *a, nodepointer newNode)
+{
+	if (!a->last) {
+		a->last = newNode;
+		newNode->link = a->last;
+		return;
+	}
+	newNode->link = (a->last)->link;
+	(a->last)->link = newNode;
+	a->last = newNode;
+	return;
+}
+
+element pop(Queue *a)
+{
+	if (!a->last) {
+		fprintf(stderr, "큐가비어있습니다");
+		exit(1);
+	}
+
+	if ((a->last)->link == a->last) {
+		nodepointer temp = a->last;
+		element e = temp->data;
+		free(temp);
+		a->last = NULL;
+		return e;
+	}
+
+	nodepointer temp = (a->last)->link;
+	(a->last)->link = (a->last)->link->link;
+	element e = temp->data;
+	free(temp);
+	return e;
+}

@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+	int key;
+} element;
+
+typedef struct node *treePointer;
+typedef struct node {
+	element data;
+	treePointer leftChild;
+	treePointer rightChild;
+} node;
+
+element *search(treePointer a, int k)
+{
+	if (a == NULL)
+		return NULL;
+	if (k == a->data.key)
+		return &(a->data);
+
+	else if (k < a->data.key) {
+		return search(a->leftChild, k);
+
+	}
+
+	else {
+		return search(a->rightChild, k);
+	}
+}
+
+element *iterSearch(treePointer a, int k)
+{
+	while (a) {
+		if (k < a->data.key) {
+			a = a->leftChild;
+		} else if (k > a->data.key) {
+			a = a->rightChild;
+		} else {
+			return &(a->data);
+		}
+	}
+	return NULL;
+}
+
+treePointer modifiedSearch(treePointer tree, int k)
+{
+	if (!tree)
+		return NULL;
+	treePointer parent = NULL;
+	while (tree) {
+		if (k == tree->data.key)
+			return NULL;
+		parent = tree;
+		if (k < tree->data.key) {
+			tree = tree->leftChild;
+		} else {
+			tree = tree->rightChild;
+		}
+	}
+	return parent;
+}
+
+void insert(treePointer *nodeRef, int k)
+{
+	treePointer where = modifiedSearch(*nodeRef, k);
+	if (where || !(*nodeRef)) {
+		treePointer ptr = (treePointer)malloc(sizeof(node));
+		if (!ptr) {
+			fprintf(stderr, "메모리할당하지않았습니다");
+			exit(1);
+		}
+		ptr->data.key = k;
+		ptr->leftChild = NULL;
+		ptr->rightChild = NULL;
+		if (*nodeRef) {
+			if (k < where->data.key) {
+				where->leftChild = ptr;
+			} else {
+				where->rightChild = ptr;
+			}
+
+		} else {
+			*nodeRef = ptr;
+		}
+	}
+}
+
+void inorder(treePointer t)
+{
+	if (!t)
+		return NULL;
+
+	inorder(t->leftChild);
+	printf("%d", t->data.key);
+	inorder(t->rightChild);
+}
+
+int main()
+{
+	treePointer root = NULL;
+	int bstKeys[] = {50, 30, 70, 20, 40, 60, 30};
+	int n = (int)(sizeof(bstKeys) / sizeof(bstKeys[0]));
+	for (int i = 0; i < n; i++) {
+		insert(&root, bstKeys[i]);
+	}
+
+	inorder(root);
+
+	int q1 = 60, q2 = 25;
+
+	element *p1 = search(root, q1);
+	element *p2 = iterSearch(root, q2);
+	printf("search(%d), %s\n", q1, p1 ? "FOUND" : "NOT FOUND");
+	printf("search(%d), %s\n", q2, p2 ? "FOUND" : "NOT FOUND");
+
+	return 0;
+}

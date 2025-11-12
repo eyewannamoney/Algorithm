@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node *Nodelink;
+typedef struct Node {
+	int coef;
+	int expon;
+	Nodelink link;
+} Node;
+
+Nodelink createNode(int coef, int expon)
+{
+	Nodelink newNode = malloc(sizeof(Node));
+	newNode->coef = coef;
+	newNode->expon = expon;
+	newNode->link = NULL;
+
+	return newNode;
+}
+
+void insertNode(Nodelink *poly, int coef, int expon)
+{
+	Nodelink newNode = createNode(coef, expon);
+
+	if (*poly == NULL) {
+		*poly = newNode;
+		return;
+	}
+	Nodelink temp = (*poly);
+	while (temp->link != NULL) {
+		temp = temp->link;
+	}
+	temp->link = newNode;
+}
+
+Nodelink addpoly(Nodelink a, Nodelink b)
+{
+	Nodelink result = NULL;
+	int c;
+	while (a != NULL || b != NULL) {
+		if (b == NULL || ((a != NULL) && (a->expon > b->expon))) {
+			insertNode(&result, a->coef, a->expon);
+			a = a->link;
+		} else if (a == NULL || a->expon < b->expon) {
+			insertNode(&result, b->coef, b->expon);
+			b = b->link;
+		} else {
+			c = a->coef + b->coef;
+			if (c != 0)
+				insertNode(&result, c, a->expon);
+			a = a->link;
+			b = b->link;
+		}
+	}
+
+	return result;
+}
+
+Nodelink MultiPoly(Nodelink a, Nodelink b)
+{
+	Nodelink result = NULL;
+
+	for (Nodelink p = a; p != NULL; p = p->link) {
+		for (Nodelink q = b; q != NULL; q = q->link) {
+			int c = p->coef * q->coef;
+			int e = p->expon + q->expon;
+
+			Nodelink temp = result, prev = NULL;
+			while (temp != NULL && temp->expon > e) {
+				prev = temp;
+				temp = temp->link;
+			}
+			if (temp != NULL && temp->expon == e) {
+				temp->coef += c;
+			} else {
+				Nodelink newNode = createNode(c, e);
+				if (prev == NULL) {
+					newNode->link = result;
+					result = newNode;
+				} else {
+					newNode->link = prev->link;
+					prev->link = newNode;
+				}
+			}
+		}
+	}
+	return result;
+}

@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct a {
+	int row;
+	int col;
+	int value;
+} term;
+
+void fastTranspose(term a[], term b[])
+{
+	int row = a[0].row;
+	int col = a[0].col;
+	int n = a[0].value;
+
+	b[0].row = col;
+	b[0].col = row;
+	b[0].value = n;
+
+	int row_terms[col];
+	int starting_pos[col];
+	starting_pos[0] = 1;
+	for (int i = 0; i < col; i++) {
+		row_terms[i] = 0;
+	}
+	for (int i = 1; i <= n; i++) {
+		row_terms[a[i].col]++;
+	}
+	for (int i = 1; i < col; i++) {
+		starting_pos[i] = starting_pos[i - 1] + row_terms[i - 1];
+	}
+
+	for (int i = 1; i <= n; i++) {
+		int pos = starting_pos[a[i].col]++;
+		b[pos].row = a[i].col;
+		b[pos].col = a[i].row;
+		b[pos].value = a[i].value;
+	}
+}
+
+int main()
+{
+	return 0;
+}

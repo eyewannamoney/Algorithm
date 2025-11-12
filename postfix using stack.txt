@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_STACK 100
+#define MAX_EXPR 100
+
+typedef enum Precedence { lparen,
+						  rparen,
+						  plus,
+						  minus,
+						  times,
+						  divide,
+						  mod,
+						  eos,
+						  operand } Precedence;
+
+int isp[] = {0, 19, 12, 12, 13, 13, 13, 0};
+int icp[] = {20, 19, 12, 12, 13, 13, 13, 0};
+
+typedef struct stack {
+	Precedence data[MAX_STACK];
+	int top;
+} stack;
+
+void initstack(stack *s)
+{
+	s->top = -1;
+}
+
+int isEmpty(stack *s) { return s->top == -1; }
+int isFull(stack *s) { return s->top == MAX_STACK - 1; }
+Precedence peek(stack *s)
+{
+	if (isEmpty(s))
+		exit(1);
+	return s->data[s->top];
+}
+
+void push(stack *s, Precedence item)
+{
+	s->data[++s->top] = item;
+}
+
+Precedence pop(stack *s)
+{
+	return s->data[s->top--];
+}
+
+Precedence getToken(char *symbol, int *n, char *expr)
+{
+	*symbol = expr[(*n)++];
+	switch (*symbol) {
+	case '(':
+		return lparen;
+	case ')':
+		return rparen;
+	case '+':
+		return plus;
+	case '-':
+		return minus;
+	case '*':
+		return times;
+	case '/':
+		return divide;
+	case '%':
+		return mod;
+	case '\0':
+		return eos;
+	default:
+		return operand;
+	}
+}
+
+void printToken(Precedence token, char symbol)
+{
+	if (token == operand)
+		printf("%c", symbol);
+	else if (token == plus)
+		printf("+");
+	else if (token == minus)
+		printf("-");
+	else if (token == times)
+		printf("*");
+	else if (token == divide)
+		printf("/");
+	else if (token == mod)
+		printf("%%");
+}
+
+void topostfix(char *expr)
+{
+	stack s;
+	initstack(&s);
+	int n = 0;
+	char symbol;
+
+	push(&s, eos);
+
+	for (Precedence token = getToken(&symbol, &n, expr); token != eos; token = getToken(&symbol, &n, expr)) {
+		if (token == operand) {
+			printf("%c", symbol);
+		} else if (token == rparen) {
+			while (peek(&s) != lparen) {
+				printToken(pop(&s), symbol);
+			}
+			pop(&s);
+		} else {
+			while (isp[peek(&s)] >= icp[token]) {
+				printToken(pop(&s), symbol);
+			}
+			push(&s, token);
+		}
+	}
+
+	while (peek(&s) != eos) {
+		printToken(pop(&s), 0);
+	}
+	printf("\n");
+}
+
+int main()
+{
+	char expr[MAX_EXPR] = "8*(7-3)/4-(2+3)%(7-4)";
+	topostfix(expr);
+	return 0;
+}

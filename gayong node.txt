@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct Node *polypointer;
+typedef struct Node {
+	int coef;
+	int exp;
+	polypointer next;
+} Node;
+polypointer avail = NULL;
+polypointer createnode(int c, int e)
+{
+	polypointer newNode;
+	malloc(sizeof(*newNode));
+	newNode->coef = c;
+	newNode->exp = e;
+	newNode->next = NULL;
+	return newNode;
+}
+void retNode(polypointer a)
+{
+	a->next = avail;
+	avail = a;
+}
+polypointer getNode()
+{
+	if (!avail) {
+		polypointer newNode = createnode(0, 0);
+		if (!newNode) {
+			fprintf(stderr, "메모리 꽉참이슈");
+			exit(1);
+		} else {
+			return newNode;
+		}
+	} else {
+		polypointer newNode = avail;
+		avail = avail->next;
+		return newNode;
+	}
+}
+void cerase(polypointer *ptr)
+{
+	if (*ptr) {
+		polypointer temp = (*ptr)->next;
+		(*ptr)->next = avail;
+		avail = temp;
+		*ptr = NULL;
+	}
+}
+int main()
+{
+	polypointer head = createnode(5, 7);
+	head->next = createnode(3, 4);
+	head->next->next = createnode(2, 1);
+	head->next->next->next = head;
+	cerase(&head);
+}

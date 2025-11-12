@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node *nodepointer;
+typedef struct node {
+	int coef;
+	int exp;
+	nodepointer link;
+} node;
+
+// addpoly, multipoly, initnode
+
+nodepointer initnode(int c, int e)
+{
+	nodepointer a = (nodepointer)malloc(sizeof(node));
+	a->coef = c;
+	a->exp = e;
+	a->link = NULL;
+
+	return a;
+}
+
+void insertnode(nodepointer *result, int c, int e)
+{
+	if (*result == NULL) {
+		*result = initnode(c, e);
+		return;
+	}
+	nodepointer temp;
+	temp = *result;
+	while (temp->link) {
+		temp = temp->link;
+	}
+	temp->link = initnode(c, e);
+}
+
+nodepointer addpoly(nodepointer a, nodepointer b)
+{
+	nodepointer result = NULL;
+	nodepointer p = a;
+	nodepointer q = b;
+	int c;
+
+	while (p != NULL || q != NULL) {
+		if (q == NULL || ((q != NULL) && (p->exp) > (q->exp))) {
+			insertnode(&result, p->coef, p->exp);
+		} else if (p == NULL || ((p != NULL) && (p->exp) < (q->exp))) {
+			insertnode(&result, q->coef, q->exp);
+		} else {
+			c = p->coef + q->coef;
+			if (c != 0) {
+				insertnode(&result, c, p->exp);
+			}
+			p = p->link;
+			q = q->link;
+		}
+	}
+
+	return result;
+}
+
+int main()
+{
+	return 0;
+}
